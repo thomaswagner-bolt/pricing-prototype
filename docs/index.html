@@ -129,6 +129,7 @@
         border-radius 0.42s cubic-bezier(0.32, 0.72, 0, 1);
       will-change: transform;
     }
+    .phone-shell.sheet-open #main-screen,
     .phone-shell.intercity-open #main-screen,
     .phone-shell.airport-open #main-screen {
       transform: scale(0.92) translateY(10px);
@@ -2720,12 +2721,17 @@
 
   <script>
     // ── Fuel & Parking Info Sheet ─────────────────
-    function openFuelSheet() {
+    function sheetOpen()  { document.querySelector('.phone-shell').classList.add('sheet-open'); }
+    function sheetClose() { document.querySelector('.phone-shell').classList.remove('sheet-open'); }
+
+        function openFuelSheet() {
+      sheetOpen();
       document.getElementById('fp-sheet-unified').classList.add('open');
       document.getElementById('fp-scrim').classList.add('open');
     }
 
     function closeFuelSheet() {
+      sheetClose();
       document.getElementById('fp-scrim').classList.remove('open');
       document.getElementById('fp-sheet-unified').classList.remove('open');
     }
@@ -2770,6 +2776,7 @@
 
     // ── Extra time & distance sheet ───────────────
     function openEtdSheet() {
+      sheetOpen();
       // Show the reduced liability row only if that add-on is active
       document.getElementById('etd-row-liability').style.display =
         reducedLiabilityOn ? 'flex' : 'none';
@@ -2777,6 +2784,7 @@
       document.getElementById('etd-sheet').classList.add('open');
     }
     function closeEtdSheet() {
+      sheetClose();
       document.getElementById('etd-scrim').classList.remove('open');
       document.getElementById('etd-sheet').classList.remove('open');
     }
@@ -2795,11 +2803,13 @@
 
     // ── Reduced Liability Sheet ────────────────────
     function openRlSheet() {
+      sheetOpen();
       document.getElementById('rl-scrim').classList.add('open');
       document.getElementById('rl-sheet').classList.add('open');
     }
 
     function closeRlSheet() {
+      sheetClose();
       document.getElementById('rl-scrim').classList.remove('open');
       document.getElementById('rl-sheet').classList.remove('open');
     }
@@ -2814,16 +2824,19 @@
     }
 
     function openPreReserveSheet() {
+      sheetOpen();
       document.getElementById('prereserve-scrim').classList.add('open');
       document.getElementById('prereserve-sheet').classList.add('open');
     }
 
     function closePreReserveSheet() {
+      sheetClose();
       // Dismiss without proceeding (X button or scrim click)
       document.getElementById('prereserve-scrim').classList.remove('open');
       document.getElementById('prereserve-sheet').classList.remove('open');
     }
     function confirmPreReserveSheet() {
+      sheetClose();
       // Got it — proceed to success screen
       document.getElementById('prereserve-scrim').classList.remove('open');
       document.getElementById('prereserve-sheet').classList.remove('open');
@@ -3395,15 +3408,26 @@
   
     // ── Onboarding modal ──────────────────────────
     function closeOnboarding() {
+      sheetClose();
       document.getElementById('onboarding-scrim').classList.remove('open');
       document.getElementById('onboarding-sheet').classList.remove('open');
     }
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        document.getElementById('onboarding-scrim').classList.add('open');
-        document.getElementById('onboarding-sheet').classList.add('open');
-      }, 400);
-    });
+    function showOnboarding() {
+      // Double rAF ensures the browser has painted before triggering the transition
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          sheetOpen();
+          document.getElementById('onboarding-scrim').classList.add('open');
+          document.getElementById('onboarding-sheet').classList.add('open');
+        });
+      });
+    }
+    // Show on every page load — DOMContentLoaded is more reliable than 'load' in Chrome
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showOnboarding);
+    } else {
+      showOnboarding();
+    }
 </script>
 </body>
 </html>
