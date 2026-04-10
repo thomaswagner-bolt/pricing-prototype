@@ -1988,7 +1988,7 @@
             </div>
             <div class="addon-text">
               <div class="addon-name">Reduced liability</div>
-              <div class="addon-desc" id="reduced-liability-desc">€9/day</div>
+              <div class="addon-desc" id="reduced-liability-desc">+ €9/day</div>
             </div>
             <div class="addon-end" onclick="event.stopPropagation(); openRlSheet()">
               <svg viewBox="0 0 24 24" fill="none" stroke="rgba(0,10,7,0.4)" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
@@ -2802,7 +2802,7 @@
       const card = document.getElementById('reduced-liability-card');
       card.classList.toggle('deselected', !reducedLiabilityOn);
       document.getElementById('reduced-liability-desc').textContent =
-        reducedLiabilityOn ? 'Included' : '€9/day';
+        reducedLiabilityOn ? 'Included' : '+ €9/day';
       updatePrice();
     }
 
@@ -3038,7 +3038,7 @@
 
       // Update reduced liability desc label
       document.getElementById('reduced-liability-desc').textContent =
-        reducedLiabilityOn ? 'Included' : '€9/day';
+        reducedLiabilityOn ? 'Included' : '+ €9/day';
 
       if (fuelParkingOn) {
         setPrice(fullTotal);
