@@ -3417,8 +3417,9 @@
     });
   
     // ── Onboarding modal ──────────────────────────
-    // Sheet animates in automatically via CSS — no JS needed to show it.
-    // JS only handles dismissal.
+    // Sheet animates in automatically via CSS. JS handles the main-screen scale + dismissal.
+    setTimeout(sheetOpen, 120);
+
     function closeOnboarding() {
       sheetClose();
       document.getElementById('onboarding-scrim').classList.add('dismissed');
