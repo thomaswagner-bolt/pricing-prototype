@@ -2551,7 +2551,7 @@
         </div>
       </div>
       <div class="fp-sheet-actions" style="padding-left:24px;padding-right:24px;">
-        <button class="fp-ok-btn" onclick="closePreReserveSheet()" style="background:#2b8659;color:#fff;">Got it</button>
+        <button class="fp-ok-btn" onclick="confirmPreReserveSheet()" style="background:#2b8659;color:#fff;">Got it</button>
         <div class="home-indicator-bar"></div>
       </div>
     </div>
@@ -2660,6 +2660,12 @@
     }
 
     function closePreReserveSheet() {
+      // Dismiss without proceeding (X button or scrim click)
+      document.getElementById('prereserve-scrim').classList.remove('open');
+      document.getElementById('prereserve-sheet').classList.remove('open');
+    }
+    function confirmPreReserveSheet() {
+      // Got it — proceed to success screen
       document.getElementById('prereserve-scrim').classList.remove('open');
       document.getElementById('prereserve-sheet').classList.remove('open');
       showSuccessScreen();
