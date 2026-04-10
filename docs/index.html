@@ -1666,24 +1666,34 @@
 
   
     /* ── Onboarding modal ──────────────────────── */
+    @keyframes onboarding-scrim-in  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes onboarding-scrim-out { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes onboarding-sheet-in  { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes onboarding-sheet-out { from { transform: translateY(0); } to { transform: translateY(100%); } }
+
     .onboarding-scrim {
       position: absolute; inset: 0; background: rgba(0,0,0,0.45);
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease; z-index: 120;
-      border-radius: 35px;
+      z-index: 120; border-radius: 35px;
+      opacity: 1; pointer-events: auto;
+      animation: onboarding-scrim-in 0.3s ease 120ms both;
     }
-    .onboarding-scrim.open { opacity: 1; pointer-events: auto; }
+    .onboarding-scrim.dismissed {
+      opacity: 0; pointer-events: none;
+      animation: onboarding-scrim-out 0.3s ease both;
+    }
     .onboarding-sheet {
       position: absolute; bottom: 0; left: 0; right: 0;
       background: #fff;
       border-radius: 16px 16px 0 0;
       box-shadow: 0 6px 24px rgba(0,0,0,0.24);
-      transform: translateY(100%);
-      transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
       z-index: 121; overflow: hidden;
       padding-top: 42px;
+      animation: onboarding-sheet-in 0.38s cubic-bezier(0.32, 0.72, 0, 1) 120ms both;
     }
-    .onboarding-sheet.open { transform: translateY(0); }
+    .onboarding-sheet.dismissed {
+      transform: translateY(100%);
+      animation: onboarding-sheet-out 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+    }
     .onboarding-handle {
       position: absolute; top: 0; left: 0; right: 0;
       display: flex; justify-content: center; padding: 9px 0;
@@ -3407,28 +3417,12 @@
     });
   
     // ── Onboarding modal ──────────────────────────
+    // Sheet animates in automatically via CSS — no JS needed to show it.
+    // JS only handles dismissal.
     function closeOnboarding() {
       sheetClose();
-      document.getElementById('onboarding-scrim').classList.remove('open');
-      document.getElementById('onboarding-sheet').classList.remove('open');
-    }
-    function showOnboarding() {
-      // Small delay after load lets Chrome establish the initial painted state,
-      // so the slide-up transition fires correctly every time
-      setTimeout(function() {
-        requestAnimationFrame(function() {
-          sheetOpen();
-          document.getElementById('onboarding-scrim').classList.add('open');
-          document.getElementById('onboarding-sheet').classList.add('open');
-        });
-      }, 120);
-    }
-    // All images are base64-inline so 'load' fires before this script runs.
-    // Check readyState directly and fall back to the event only if still loading.
-    if (document.readyState === 'complete') {
-      showOnboarding();
-    } else {
-      window.addEventListener('load', showOnboarding);
+      document.getElementById('onboarding-scrim').classList.add('dismissed');
+      document.getElementById('onboarding-sheet').classList.add('dismissed');
     }
 </script>
 </body>
