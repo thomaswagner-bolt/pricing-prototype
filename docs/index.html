@@ -2979,11 +2979,13 @@
     function navigateToRefuelFaq() {
       // Close F&P sheet
       closeFuelSheet();
-      // Reveal hidden FAQs and hide the Show More button
+      // Reveal hidden FAQs and update button to "Show less"
       const extra = document.getElementById('faq-extra');
       const btn   = document.querySelector('.show-more-btn');
-      if (extra) { extra.classList.add('visible'); }
-      if (btn)   { btn.parentElement.style.display = 'none'; }
+      if (extra && !extra.classList.contains('visible')) {
+        extra.classList.add('visible');
+        if (btn) btn.textContent = 'Show less';
+      }
       // Open faq6 (How does refuelling work?)
       const faq6 = document.getElementById('faq6');
       if (faq6) {
