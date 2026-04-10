@@ -2147,7 +2147,7 @@
           <span style="display:inline-block;background:rgba(0,45,30,0.07);color:#191f1c;font-size:12px;font-weight:600;line-height:15px;border-radius:4px;padding:2px 6px;">Available for 100+ km drives only</span>
         </div>
         <!-- FAQ link -->
-        <p style="font-size:16px;font-weight:400;color:rgba(0,112,66,0.92);line-height:24px;letter-spacing:-0.176px;margin:0;padding: 4px 0 8px;">Read more about how it works in the FAQs</p>
+        <p style="font-size:16px;font-weight:400;color:rgba(0,112,66,0.92);line-height:24px;letter-spacing:-0.176px;margin:0;padding: 4px 0 8px;cursor:pointer;" onclick="navigateToRefuelFaq()">Read more about how it works in the FAQs</p>
       </div>
       <div class="fp-sheet-actions" style="padding-left:24px;padding-right:24px;">
         <button onclick="closeFuelSheet()" style="width:100%;min-height:56px;background:rgba(0,45,30,0.07);border:none;border-radius:9600px;font-size:18px;font-weight:600;color:#191f1c;letter-spacing:-0.252px;line-height:22px;">OK</button>
@@ -2976,6 +2976,33 @@
     }
 
     // ── Show more / Show less ──────────────────────
+    function navigateToRefuelFaq() {
+      // Close F&P sheet
+      closeFuelSheet();
+      // Reveal hidden FAQs and hide the Show More button
+      const extra = document.getElementById('faq-extra');
+      const btn   = document.querySelector('.show-more-btn');
+      if (extra) { extra.classList.add('visible'); }
+      if (btn)   { btn.parentElement.style.display = 'none'; }
+      // Open faq6 (How does refuelling work?)
+      const faq6 = document.getElementById('faq6');
+      if (faq6) {
+        // Close any open accordion first
+        document.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('open'));
+        faq6.classList.add('open');
+        // Scroll within the phone's scroll container (not the outer page)
+        setTimeout(() => {
+          const scroller = document.querySelector('.scroll-content');
+          if (scroller) {
+            const scrollerRect = scroller.getBoundingClientRect();
+            const faqRect = faq6.getBoundingClientRect();
+            const offset = faqRect.top - scrollerRect.top + scroller.scrollTop - 16;
+            scroller.scrollTo({ top: offset, behavior: 'smooth' });
+          }
+        }, 320);
+      }
+    }
+
     function showMore() {
       const extra = document.getElementById('faq-extra');
       const btn   = document.querySelector('.show-more-btn');
