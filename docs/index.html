@@ -1674,14 +1674,10 @@
     .onboarding-scrim {
       position: absolute; inset: 0; background: rgba(0,0,0,0.45);
       z-index: 120; border-radius: 35px;
-      opacity: 1; pointer-events: auto;
-      /* No delay — Chrome skips animations on clipped elements during delay */
-      animation: onboarding-scrim-in 0.3s ease both;
-    }
-    .onboarding-scrim.dismissed {
       opacity: 0; pointer-events: none;
-      animation: onboarding-scrim-out 0.3s ease both;
+      transition: opacity 0.3s ease;
     }
+    .onboarding-scrim.open { opacity: 1; pointer-events: auto; }
     .onboarding-sheet {
       position: absolute; bottom: 0; left: 0; right: 0;
       background: #fff;
@@ -1689,15 +1685,10 @@
       box-shadow: 0 6px 24px rgba(0,0,0,0.24);
       z-index: 121; overflow: hidden;
       padding-top: 42px;
-      /* will-change forces a compositor layer so Chrome animates it correctly */
-      will-change: transform;
-      animation: onboarding-sheet-in 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
-    }
-    .onboarding-sheet.dismissed {
       transform: translateY(100%);
-      will-change: auto;
-      animation: onboarding-sheet-out 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+      transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
     }
+    .onboarding-sheet.open { transform: translateY(0); }
     .onboarding-handle {
       position: absolute; top: 0; left: 0; right: 0;
       display: flex; justify-content: center; padding: 9px 0;
@@ -3413,21 +3404,27 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js"></script>
   <script>
-    rrweb.record({
-      emit(event) {
-        window.parent.postMessage({ type: 'rrweb-event', event: event }, '*');
-      },
-      checkoutEveryNms: 30000,
-    });
+    if (typeof rrweb !== 'undefined') {
+      rrweb.record({
+        emit(event) {
+          window.parent.postMessage({ type: 'rrweb-event', event: event }, '*');
+        },
+        checkoutEveryNms: 30000,
+      });
+    }
   
     // ── Onboarding modal ──────────────────────────
     // Sheet animates in automatically via CSS. JS handles the main-screen scale + dismissal.
-    setTimeout(sheetOpen, 120);
+    setTimeout(function() {
+      sheetOpen();
+      document.getElementById('onboarding-scrim').classList.add('open');
+      document.getElementById('onboarding-sheet').classList.add('open');
+    }, 200);
 
     function closeOnboarding() {
       sheetClose();
-      document.getElementById('onboarding-scrim').classList.add('dismissed');
-      document.getElementById('onboarding-sheet').classList.add('dismissed');
+      document.getElementById('onboarding-scrim').classList.remove('open');
+      document.getElementById('onboarding-sheet').classList.remove('open');
     }
 </script>
 </body>
