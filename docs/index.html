@@ -3421,10 +3421,15 @@
           document.getElementById('onboarding-scrim').classList.add('open');
           document.getElementById('onboarding-sheet').classList.add('open');
         });
-      }, 80);
+      }, 120);
     }
-    // Use 'load' (not DOMContentLoaded) so fonts/styles are applied before we animate
-    window.addEventListener('load', showOnboarding);
+    // All images are base64-inline so 'load' fires before this script runs.
+    // Check readyState directly and fall back to the event only if still loading.
+    if (document.readyState === 'complete') {
+      showOnboarding();
+    } else {
+      window.addEventListener('load', showOnboarding);
+    }
 </script>
 </body>
 </html>
