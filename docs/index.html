@@ -694,7 +694,7 @@
       border-color: transparent;
       background: var(--color-bg-neutral);
     }
-    /* Fuel & parking unavailable below 100 km */
+    /* Fuel & parking unavailable below 1-day rentals */
     .addon-card.disabled {
       opacity: 0.5;
       cursor: pointer;
@@ -1721,7 +1721,7 @@
           </svg>
         </button>
         <!-- Compact title — fades in when scrolled, flex:1 between close btn and spacer -->
-        <div class="nav-compact-title" id="nav-compact-title">€7 · 1 hr & 0 km</div>
+        <div class="nav-compact-title" id="nav-compact-title">€7 · 1 hr & 5 km</div>
         <!-- Mirrors close-btn width so title is centred in the full header -->
         <div class="nav-compact-end"></div>
       </div>
@@ -2142,9 +2142,9 @@
         </div>
         <!-- Item 2: Exclude for longer drives -->
         <div style="padding: 12px 0;">
-          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 2px;">Choose to exclude for longer drives</p>
-          <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 6px;">If excluded, you must cover all fuel and parking costs yourself and cannot use the Bolt app/fuel card. You need to return the car with the same fuel level as it had at pickup.</p>
-          <span style="display:inline-block;background:rgba(0,45,30,0.07);color:#191f1c;font-size:12px;font-weight:600;line-height:15px;border-radius:4px;padding:2px 6px;">Available for 100+ km drives only</span>
+          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 2px;">Exclude for 1+ day drives</p>
+          <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 6px;">If you choose to exclude, you must cover all fuel and parking costs yourself and cannot use the Bolt app/fuel card. You need to return the car with the same fuel level as it had at pickup (shown in the app).</p>
+          <span style="display:inline-block;background:rgba(0,45,30,0.07);color:#191f1c;font-size:12px;font-weight:600;line-height:15px;border-radius:4px;padding:2px 6px;">Best for long distant drives</span>
         </div>
         <!-- FAQ link -->
         <p style="font-size:16px;font-weight:400;color:rgba(0,112,66,0.92);line-height:24px;letter-spacing:-0.176px;margin:0;padding: 4px 0 8px;cursor:pointer;" onclick="navigateToRefuelFaq()">Read more about how it works in the FAQs</p>
@@ -2576,7 +2576,7 @@
       const badge = document.getElementById('fp-tile-badge');
       if (!badge) return;
       const card = document.getElementById('fuel-parking-card');
-      const isForced  = card.classList.contains('disabled');   // km < 100
+      const isForced  = card.classList.contains('disabled');   // duration < 1d
       const isIncluded = !card.classList.contains('deselected');
       badge.style.display = (!isForced && isIncluded) ? 'flex' : 'none';
     }
@@ -2694,14 +2694,13 @@
     let fuelParkingOn = true;
 
     function toggleFuelParking() {
-      // When tile is disabled (km < 100), clicking anywhere opens the info sheet
+      // When tile is disabled (duration < 1 day), clicking anywhere opens the info sheet
       if (document.getElementById('fuel-parking-card').classList.contains('disabled')) {
         openFuelSheet();
         return;
       }
       const kmTile = document.querySelector('#distance-carousel .option-tile.selected');
       const km = kmTile ? parseInt(kmTile.dataset.km, 10) : 0;
-      if (km < 100) return; // not available below 100 km
 
       fuelParkingOn = !fuelParkingOn;
       updateFpBadge();
@@ -2719,15 +2718,18 @@
       updatePrice();
     }
 
-    // Disable/enable fuel & parking based on selected km
+    // Day-based duration keys that allow fuel & parking opt-out (1d+)
+    const FP_ALLOWED_DURATIONS = new Set(['1d','2d','3d','4d','5d','6d','7d','8d','9d','10d','11d','12d','13d','14d']);
+
+    // Disable/enable fuel & parking based on selected duration (1d+)
     function syncFuelParkingAvailability() {
-      const kmTile = document.querySelector('#distance-carousel .option-tile.selected');
-      const km = kmTile ? parseInt(kmTile.dataset.km, 10) : 0;
+      const durTile = document.querySelector('#duration-carousel .option-tile.selected');
+      const durationKey = durTile ? durTile.dataset.durationKey : '1h';
       const card = document.getElementById('fuel-parking-card');
       const desc = document.getElementById('fuel-parking-desc');
 
-      if (km < 100) {
-        // Force back to selected/included state and disable
+      if (!FP_ALLOWED_DURATIONS.has(durationKey)) {
+        // Force back to included state and disable toggle
         if (!fuelParkingOn) {
           fuelParkingOn = true;
           card.classList.remove('deselected');
@@ -2854,7 +2856,7 @@
       const liabilityCost = reducedLiabilityOn ? reducedLiabilityCost() : 0;
       const fullTotal     = base + km * RATE_PER_KM + liabilityCost;
 
-      // Sync fuel & parking availability (requires ≥ 100 km)
+      // Sync fuel & parking availability (requires 1d+ duration)
       syncFuelParkingAvailability();
 
       // Update reduced liability desc label
@@ -2880,12 +2882,12 @@
 
     // ── KM options per duration key ────────────────
     const KM_MAP = {
-      '1h':  [0, 5, 10, 20, 30, 50],
-      '2h':  [0, 10, 20, 30, 50, 100],
-      '3h':  [0, 10, 20, 50, 75, 100],
-      '6h':  [0, 20, 50, 100, 250, 500],
-      '12h': [0, 50, 100, 150, 250, 500],
-      '1d':  [0, 50, 100, 250, 500, 750],
+      '1h':  [5, 10, 20, 30, 50, 75],
+      '2h':  [10, 20, 30, 50, 100, 150],
+      '3h':  [10, 20, 50, 75, 100, 150],
+      '6h':  [20, 50, 100, 250, 500, 750],
+      '12h': [50, 100, 150, 250, 500, 750],
+      '1d':  [50, 100, 250, 500, 750, 1000],
       '2d':  [100, 200, 300, 500, 750, 1000],
       '3d':  [100, 250, 400, 600, 900, 1200],
       '4d':  [100, 200, 400, 600, 900, 1200],
@@ -2902,17 +2904,18 @@
     };
 
     // ── Rebuild distance carousel ──────────────────
-    function buildDistanceCarousel(durationKey, selectedKm = 0) {
+    function buildDistanceCarousel(durationKey, selectedKm = null) {
       const track = document.getElementById('distance-carousel');
       const kmOptions = (KM_MAP[durationKey] || KM_MAP['1h']).slice(0, 6);
 
       // Snap selected value to a valid option (nearest that still exists, or first)
-      // Exact match → keep it. Otherwise find the nearest value (lower or higher).
-      const validKm = kmOptions.includes(selectedKm)
-        ? selectedKm
-        : kmOptions.reduce((prev, curr) =>
-            Math.abs(curr - selectedKm) < Math.abs(prev - selectedKm) ? curr : prev
-          );
+      const validKm = selectedKm === null
+        ? kmOptions[0]
+        : kmOptions.includes(selectedKm)
+          ? selectedKm
+          : kmOptions.reduce((prev, curr) =>
+              Math.abs(curr - selectedKm) < Math.abs(prev - selectedKm) ? curr : prev
+            );
 
       track.innerHTML = kmOptions.map(km => {
         const isSelected = km === validKm;
