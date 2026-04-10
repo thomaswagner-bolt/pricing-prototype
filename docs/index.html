@@ -3413,21 +3413,18 @@
       document.getElementById('onboarding-sheet').classList.remove('open');
     }
     function showOnboarding() {
-      // Double rAF ensures the browser has painted before triggering the transition
-      requestAnimationFrame(function() {
+      // Small delay after load lets Chrome establish the initial painted state,
+      // so the slide-up transition fires correctly every time
+      setTimeout(function() {
         requestAnimationFrame(function() {
           sheetOpen();
           document.getElementById('onboarding-scrim').classList.add('open');
           document.getElementById('onboarding-sheet').classList.add('open');
         });
-      });
+      }, 80);
     }
-    // Show on every page load — DOMContentLoaded is more reliable than 'load' in Chrome
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', showOnboarding);
-    } else {
-      showOnboarding();
-    }
+    // Use 'load' (not DOMContentLoaded) so fonts/styles are applied before we animate
+    window.addEventListener('load', showOnboarding);
 </script>
 </body>
 </html>
