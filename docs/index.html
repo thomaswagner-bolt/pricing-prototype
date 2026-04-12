@@ -2610,8 +2610,8 @@
         </div>
         <!-- Item 2 -->
         <div style="padding: 12px 0;">
-          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 2px;">Pay €9/day for reduced liability</p>
-          <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 6px;">With this add-on, your liability for damages to the vehicle is limited to €0. Your liability for damages to others is limited to €0.</p>
+          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 2px;">Pay extra for reduced liability</p>
+          <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 6px;">If you choose this add on, your liability for damages to the vehicle is limited to €0. Your liability for damages to others is limited to €0.</p>
           <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,160,64,0.09);border-radius:4px;padding:2px 6px;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="rgba(0,160,64,0.2)" stroke="rgba(0,112,66,0.92)" stroke-width="1.5" stroke-linejoin="round"/>
@@ -2620,8 +2620,21 @@
             <span style="font-size:12px;font-weight:600;color:rgba(0,112,66,0.92);line-height:15px;">Recommended</span>
           </span>
         </div>
+        <!-- Pricing rows -->
+        <div style="padding: 12px 0 0 0; display:flex; flex-direction:column; gap:0;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;">
+            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Hourly rates</span>
+            <span style="flex:1;border-bottom:1px dotted rgba(0,45,30,0.2);margin:0 6px 3px;"></span>
+            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">+ €4/rental</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;">
+            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Daily rates</span>
+            <span style="flex:1;border-bottom:1px dotted rgba(0,45,30,0.2);margin:0 6px 3px;"></span>
+            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">+ €9/day</span>
+          </div>
+        </div>
         <!-- Footer -->
-        <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0;padding-top:12px;">Protection is subject to compliance with Bolt's <a href="#" style="color:rgba(0,110,55,0.83);text-decoration:none;">Terms &amp; Conditions</a>. Report accidents or damage immediately to Bolt and the police.</p>
+        <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0;padding-bottom:12px;">Protection is subject to compliance with Bolt's <a href="#" style="color:rgba(0,110,55,0.83);text-decoration:none;">Terms &amp; Conditions</a>. Report accidents or damage immediately to Bolt and the police.</p>
       </div>
       <div class="fp-sheet-actions" style="padding-left:24px;padding-right:24px;">
         <button onclick="closeRlSheet()" style="width:100%;min-height:56px;background:rgba(0,45,30,0.07);border:none;border-radius:9600px;font-size:18px;font-weight:600;color:#191f1c;letter-spacing:-0.252px;line-height:22px;">OK</button>
@@ -2720,7 +2733,7 @@
         </div>
         <!-- Text -->
         <h2 class="onboarding-title">Pick your add-ons</h2>
-        <p class="onboarding-body">Exclude fuel and parking costs for 1+ day drives and reduce your liability for €9/day.</p>
+        <p class="onboarding-body">Exclude fuel and parking costs for 1+ day drives and reduce your liability from €4/rental.</p>
       </div>
       <!-- CTA -->
       <div class="onboarding-actions">
@@ -2805,12 +2818,19 @@
     // ── Reduced liability state ────────────────────
     let reducedLiabilityOn = false;
 
+    const RL_RENTAL_KEYS = new Set(['1h','2h','3h','6h','12h']);
+    function reducedLiabilityPriceLabel() {
+      const durTile = document.querySelector('#duration-carousel .option-tile.selected');
+      const key = durTile ? durTile.dataset.durationKey : '1h';
+      return RL_RENTAL_KEYS.has(key) ? '+ €4/rental' : '+ €9/day';
+    }
+
     function toggleReducedLiability() {
       reducedLiabilityOn = !reducedLiabilityOn;
       const card = document.getElementById('reduced-liability-card');
       card.classList.toggle('deselected', !reducedLiabilityOn);
       document.getElementById('reduced-liability-desc').textContent =
-        reducedLiabilityOn ? 'Included' : '+ €9/day';
+        reducedLiabilityOn ? 'Included' : reducedLiabilityPriceLabel();
       updatePrice();
     }
 
@@ -2871,8 +2891,9 @@
       if (!durTile) return 0;
       const key = durTile.dataset.durationKey;
       const n = parseInt(key);
-      // Days → n × €9; hours → flat €9 (1-day minimum)
-      return (key.endsWith('d') ? n : 1) * 9;
+      // 1h–12h → flat €4/rental; days → n × €9/day
+      if (!key.endsWith('d')) return 4;
+      return n * 9;
     }
 
     // ── Fuel & parking state ───────────────────────
@@ -3046,7 +3067,7 @@
 
       // Update reduced liability desc label
       document.getElementById('reduced-liability-desc').textContent =
-        reducedLiabilityOn ? 'Included' : '+ €9/day';
+        reducedLiabilityOn ? 'Included' : reducedLiabilityPriceLabel();
 
       if (fuelParkingOn) {
         setPrice(fullTotal);
