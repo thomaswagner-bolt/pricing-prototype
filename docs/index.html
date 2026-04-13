@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Bolt Drive – Packages</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Bolt Drive" />
+  <meta name="theme-color" content="#191f1c" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -3457,6 +3464,22 @@
       document.getElementById('onboarding-scrim').classList.remove('open');
       document.getElementById('onboarding-sheet').classList.remove('open');
     }
+</script>
+<script>
+  // Collapse mobile browser address bar on load
+  window.addEventListener('load', () => {
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      // Brief document height expansion trick to trigger address bar collapse
+      document.documentElement.style.height = 'calc(100vh + 1px)';
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.style.height = '';
+        }, 50);
+      }, 300);
+    }
+  });
 </script>
 </body>
 </html>

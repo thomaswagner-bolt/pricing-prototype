@@ -1,0 +1,10 @@
+{
+  "name": "Bolt Drive – Packages",
+  "short_name": "Bolt Drive",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "./index.html",
+  "background_color": "#ffffff",
+  "theme_color": "#191f1c",
+  "icons": []
+}
