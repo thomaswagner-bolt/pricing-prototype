@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Bolt Drive" />
-  <meta name="theme-color" content="#191f1c" />
+  <meta name="theme-color" content="#000000" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -195,17 +195,7 @@
       height: 10px;
       padding: 0 16px;
     }
-    /* Back card: narrower, 60% opacity */
-    .modal-peek::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 32px; right: 32px;
-      height: 10px;
-      background: rgba(255,255,255,0.55);
-      border-radius: 10px 10px 0 0;
-    }
-    /* Front card: full width, slightly transparent */
+    /* Single peek card */
     .modal-peek::after {
       content: '';
       position: absolute;
@@ -933,7 +923,7 @@
     /* ── Responsive: fill full screen on mobile ─── */
     @media (max-width: 430px) {
       html, body {
-        background: var(--color-white);
+        background: #000000;
         display: block;
         padding: 0;
         margin: 0;
@@ -1795,7 +1785,6 @@
     <div class="iphone-vol-up"></div>
     <div class="iphone-vol-down"></div>
     <!-- Dynamic Island overlaid on screen -->
-    <div class="dynamic-island"></div>
 
   <div class="phone-shell">
 
@@ -1826,7 +1815,7 @@
       </div>
     </div>
 
-    <!-- Peek cards above modal sheet -->
+    <!-- Peek card above modal sheet -->
     <div class="modal-peek"></div>
 
     <!-- MODAL SHEET -->
