@@ -1285,7 +1285,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 48px 24px 16px;
+      padding: 28px 24px 16px;
       gap: 16px;
       text-align: center;
     }
@@ -1313,6 +1313,33 @@
     .prereserve-body strong {
       font-weight: 600;
       color: #191f1c;
+    }
+    .prereserve-close {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 3;
+    }
+    .prereserve-close-inner {
+      width: 28px;
+      height: 28px;
+      background: rgba(0,20,13,0.10);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .prereserve-close svg {
+      width: 14px;
+      height: 14px;
     }
     .rl-sheet {
       position: absolute;
@@ -2674,8 +2701,8 @@
     <div class="prereserve-scrim" id="prereserve-scrim" onclick="closePreReserveSheet()"></div>
     <div class="prereserve-sheet" id="prereserve-sheet">
       <div class="fp-sheet-handle"></div>
-      <button class="fp-sheet-close" onclick="closePreReserveSheet()">
-        <div class="fp-sheet-close-inner">
+      <button class="prereserve-close" onclick="closePreReserveSheet()">
+        <div class="prereserve-close-inner">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M6 6l12 12M18 6L6 18" stroke="#191f1c" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
