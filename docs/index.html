@@ -674,7 +674,7 @@
       display: none;
       align-items: center;
       gap: 4px;
-      background: #2b8659;
+      background: #5966f3;
       border-radius: 6px;
       padding: 2px 8px 2px 6px;
       font-size: 13px;
@@ -697,7 +697,6 @@
     }
     /* Fuel & parking unavailable below 1-day rentals */
     .addon-card.disabled {
-      opacity: 0.5;
       cursor: pointer;
     }
     /* image wrapper: exact 48×48 from Figma */
@@ -719,18 +718,32 @@
     .addon-text {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 0;
       align-items: flex-start;
+    }
+    #fuel-parking-card .addon-text {
+      gap: 4px;
       justify-content: center;
       flex-shrink: 0;
       white-space: nowrap;
     }
     .addon-name {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
       font-size: 16px;
       font-weight: 600;
       color: var(--color-primary);
       letter-spacing: -0.176px;
       line-height: 20px;
+      font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
+    }
+    .addon-subline {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(0,10,7,0.63);
+      letter-spacing: -0.084px;
+      line-height: 18px;
       font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
     }
     .addon-desc {
@@ -1215,6 +1228,89 @@
       transition: opacity 0.3s ease;
     }
     .rl-scrim.open { opacity: 1; pointer-events: auto; }
+
+    /* ── Add-ons spotlight tooltip ───────────────── */
+    .addons-spotlight {
+      position: absolute;
+      inset: 0;
+      z-index: 600;
+      background: rgba(0,0,0,0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .addons-spotlight.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* The cutout hole is punched via clip-path set by JS */
+    .addons-spotlight-cutout { display: none; }
+    .addons-spotlight-popover {
+      position: absolute;
+      width: 275px;
+      background: #ffffff;
+      border-radius: 12px;
+      filter: drop-shadow(0px 2px 6px rgba(0,0,0,0.16));
+      pointer-events: none;
+    }
+    .addons-spotlight.open .addons-spotlight-popover {
+      pointer-events: auto;
+    }
+    .addons-spotlight-content {
+      padding: 12px 36px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .addons-spotlight-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #191f1c;
+      letter-spacing: -0.176px;
+      line-height: 20px;
+      margin: 0;
+      font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
+    }
+    .addons-spotlight-body {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(0,10,7,0.63);
+      letter-spacing: -0.084px;
+      line-height: 20px;
+      margin: 0;
+      font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
+    }
+    .addons-spotlight-close {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 32px;
+      height: 32px;
+      border-radius: 20px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      color: #191f1c;
+    }
+    .addons-spotlight-close svg {
+      width: 16px;
+      height: 16px;
+    }
+    .addons-spotlight-popover::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 15px;
+      width: 16px;
+      height: 8px;
+      background: white;
+      clip-path: path('M0 0 L8 8 L16 0 Z');
+      pointer-events: none;
+    }
 
     /* ── Success screen ──────────────────────────── */
     .success-screen {
@@ -1992,7 +2088,7 @@
       </div>
 
       <!-- ADD ONS -->
-      <div class="section">
+      <div class="section" id="addons-section">
         <div class="section-header">
           <span class="section-title">Add-ons</span>
         </div>
@@ -2001,7 +2097,7 @@
           <button class="addon-card" id="fuel-parking-card" onclick="toggleFuelParking()">
             <div class="fp-tile-badge" id="fp-tile-badge">
               <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .53.21 1.04.59 1.41l9 9c.37.37.87.59 1.41.59s1.04-.22 1.41-.59l7-7c.37-.37.59-.87.59-1.41s-.22-1.04-.59-1.41zM6.5 8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                <path d="M12.9 2.1 21.9 11.1C22.6 11.9 22.6 13.1 21.9 13.9L13.9 21.9C13.1 22.6 11.9 22.6 11.1 21.9L2.1 12.9C1.7 12.5 1.5 12 1.5 11.4V3.5C1.5 2.4 2.4 1.5 3.5 1.5H11.4C12 1.5 12.5 1.7 12.9 2.1ZM7 6C6.4 6 5.9 6.2 5.5 6.6 5.1 7 4.9 7.5 4.9 8.1 4.9 8.7 5.1 9.2 5.5 9.6 5.9 10 6.4 10.2 7 10.2 7.6 10.2 8.1 10 8.5 9.6 8.9 9.2 9.1 8.7 9.1 8.1 9.1 7.5 8.9 7 8.5 6.6 8.1 6.2 7.6 6 7 6ZM10 14 14 10 13 9 9 13Z"/>
               </svg>
               Exclude to save
             </div>
@@ -2026,7 +2122,7 @@
               <img src="https://www.figma.com/api/mcp/asset/f251824c-7bc6-4101-b87b-f032cce8303a" alt="Shield" />
             </div>
             <div class="addon-text">
-              <div class="addon-name">Reduced liability</div>
+              <div class="addon-name">Reduced liability<div class="addon-subline">from €750 to €0</div></div>
               <div class="addon-desc" id="reduced-liability-desc">+ €9/day</div>
             </div>
             <div class="addon-end" onclick="event.stopPropagation(); openRlSheet()">
@@ -2265,6 +2361,22 @@
     </div><!-- /modal-sheet -->
   </div><!-- /main-screen -->
 
+    <!-- ── Add-ons spotlight tooltip ────────────── -->
+    <div class="addons-spotlight" id="addons-spotlight" onclick="closeAddonsTooltip()">
+      <div class="addons-spotlight-cutout" id="addons-spotlight-cutout"></div>
+      <div class="addons-spotlight-popover" id="addons-spotlight-popover" onclick="event.stopPropagation()">
+        <div class="addons-spotlight-content">
+          <p class="addons-spotlight-title">Choose what's included</p>
+          <p class="addons-spotlight-body">Exclude fuel and parking costs to save on drives of 1 or more days.</p>
+        </div>
+        <button class="addons-spotlight-close" onclick="event.stopPropagation(); closeAddonsTooltip()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <!-- ── Fuel & Parking info sheet — INCLUDED (active / disabled) ── -->
     <div class="fp-scrim" id="fp-scrim" onclick="closeFuelSheet()"></div>
     <div class="fp-sheet" id="fp-sheet-unified">
@@ -2284,19 +2396,19 @@
       </div>
       <div style="padding: 0 24px; display: flex; flex-direction: column;">
         <!-- Item 1: Always included -->
-        <div style="padding: 12px 0; border-bottom: 1px solid rgba(0,45,30,0.07);">
-          <p style="font-size:16px;font-weight:400;color:#191f1c;line-height:22px;letter-spacing:-0.176px;margin:0;">By default, fuel and parking is included. You don't have to refuel when you drop off the car and you can park for free in allowed areas where Bolt Drive operates.</p>
+        <div style="padding: 8px 0 12px; border-bottom: 1px solid rgba(0,45,30,0.07);">
+          <p style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0;">By default, your rental includes fuel and parking. You don't have to refuel before returning the car, and you can park for free in allowed Bolt Drive operating areas.</p>
         </div>
-        <!-- Item 2: Exclude for longer drives -->
+        <!-- Item 2: You choose for longer drives -->
         <div style="padding: 12px 0;">
-          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 2px;">Exclude for long drives (1+ days)</p>
-          <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 6px;">You can choose to exclude fuel and parking costs. You then must pay for these yourself and drop off the car with the same fuel level it had at pickup.</p>
+          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 2px;">You choose for longer drives</p>
+          <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 6px;">For drives of 1 or more days, you can choose to exclude fuel and parking costs from your rental rate. If you do, you'll pay those costs yourself. You'll need to return the car with the same fuel level it had at pickup.</p>
           <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,160,64,0.09);color:rgba(0,112,66,0.92);font-size:12px;font-weight:600;line-height:15px;border-radius:4px;padding:2px 8px 2px 6px;">
-              Available for 1+ days
-            </span>
+            For rentals of 1+ days
+          </span>
         </div>
         <!-- FAQ link -->
-        <p style="font-size:16px;font-weight:400;color:rgba(0,112,66,0.92);line-height:24px;letter-spacing:-0.176px;margin:0;padding: 4px 0 0;cursor:pointer;" onclick="navigateToRefuelFaq()">Read more about how refueling works</p>
+        <p style="font-size:16px;font-weight:400;color:rgba(0,112,66,0.92);line-height:24px;letter-spacing:-0.176px;margin:0;padding: 4px 0 0;cursor:pointer;" onclick="navigateToRefuelFaq()">How does refuelling work?</p>
       </div>
       <div class="fp-sheet-actions" style="padding-left:24px;padding-right:24px;">
         <button onclick="closeFuelSheet()" style="width:100%;min-height:56px;background:rgba(0,45,30,0.07);border:none;border-radius:9600px;font-size:18px;font-weight:600;color:#191f1c;letter-spacing:-0.252px;line-height:22px;">OK</button>
@@ -2323,7 +2435,7 @@
       </div>
       <div class="etd-sheet-body" style="padding-top:0;">
 
-        <p class="etd-para">If your rental takes longer than expected, you'll be charged extra or you'll be updated to the next-best hourly or daily rate.</p>
+        <p class="etd-para">Rental taking longer than reserved? You'll either be charged extra, or your rental will update to the next-best hourly or daily rate.</p>
         <div class="etd-rows">
           <div class="etd-row">
             <span class="etd-row-label">Extra minute</span>
@@ -2643,11 +2755,11 @@
       <div style="padding: 0 24px; display: flex; flex-direction: column;">
         <!-- Item 1 -->
         <div style="padding: 8px 0 12px; border-bottom: 1px solid rgba(0,45,30,0.07);">
-          <p style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0;">By default, your liability for damages to the vehicle is limited to €750. Your liability for damages to others is limited to €750.</p>
+          <p style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0;">By default, your liability for damage to the vehicle is limited to €750. Your liability for damage to others is limited to €750.</p>
         </div>
         <!-- Item 2 -->
         <div style="padding: 12px 0 8px;">
-          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 4px;">Pay extra and reduce your liability to €0</p>
+          <p style="font-size:16px;font-weight:600;color:#191f1c;line-height:20px;letter-spacing:-0.176px;margin:0 0 4px;">Pay extra to reduce your liability to €0</p>
           <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(0,160,64,0.09);border-radius:4px;padding:2px 6px;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="rgba(0,160,64,0.2)" stroke="rgba(0,112,66,0.92)" stroke-width="1.5" stroke-linejoin="round"/>
@@ -2659,12 +2771,12 @@
         <!-- Pricing rows -->
         <div style="padding: 8px 0 0 0; display:flex; flex-direction:column; gap:0;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;">
-            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Hourly rates</span>
+            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Renting per hour</span>
             <span style="flex:1;border-bottom:1px dotted rgba(0,45,30,0.2);margin:0 6px 3px;"></span>
             <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">+ €4/rental</span>
           </div>
           <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;">
-            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Daily rates</span>
+            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Renting per day</span>
             <span style="flex:1;border-bottom:1px dotted rgba(0,45,30,0.2);margin:0 6px 3px;"></span>
             <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">+ €9/day</span>
           </div>
@@ -2770,7 +2882,7 @@
         </div>
         <!-- Text -->
         <h2 class="onboarding-title">Pick your add-ons</h2>
-        <p class="onboarding-body">Exclude fuel and parking costs for 1+ day drives and reduce your liability from €4/rental.</p>
+        <p class="onboarding-body">Exclude fuel and parking costs to save on drives of 1 or more days. Reduce your liability from €4/rental.</p>
       </div>
       <!-- CTA -->
       <div class="onboarding-actions">
@@ -2849,9 +2961,73 @@
       document.getElementById('etd-sheet').classList.remove('open');
     }
 
+    // ── Add-ons spotlight tooltip ─────────────────
+    let addonsTooltipSeen = false;
+
+    function showAddonsTooltip() {
+      if (addonsTooltipSeen) return;
+      addonsTooltipSeen = true;
+
+      // Snap add-ons row back to start so fuel & parking is visible
+      const addonsRow = document.querySelector('.addons-row');
+      if (addonsRow) addonsRow.scrollLeft = 0;
+
+      const scrim    = document.getElementById('addons-spotlight');
+      const section  = document.getElementById('addons-section');
+      const popover  = document.getElementById('addons-spotlight-popover');
+      const shell    = document.querySelector('.phone-shell');
+      const scrollEl = document.getElementById('scroll-content');
+
+      // Walk the offsetParent chain from section up to phone-shell,
+      // summing offsetTop values. This gives position in shell-local coordinates,
+      // independent of viewport scroll or external transforms.
+      let offsetTop = 0;
+      let el = section;
+      while (el && el !== shell) {
+        offsetTop += el.offsetTop;
+        el = el.offsetParent;
+      }
+
+      // Subtract scroll-content's scrollTop so the position reflects what's visible
+      const cT = offsetTop - scrollEl.scrollTop;
+      const cB = cT + section.offsetHeight;
+      const margin = 12;
+      const r      = 10;
+      const cL     = margin;
+      const cR     = shell.offsetWidth - margin;
+      const W      = shell.offsetWidth;
+      const H      = shell.offsetHeight;
+
+      // Use SVG path() for true rounded corners (quadratic Bézier curves).
+      // Outer rect (CW) + inner rounded rect (CCW) → hole via nonzero fill rule.
+      const svgPath = [
+        `M0 0 H${W} V${H} H0 Z`,
+        `M${cL+r} ${cT}`,
+        `Q${cL} ${cT} ${cL} ${cT+r}`,
+        `L${cL} ${cB-r}`,
+        `Q${cL} ${cB} ${cL+r} ${cB}`,
+        `L${cR-r} ${cB}`,
+        `Q${cR} ${cB} ${cR} ${cB-r}`,
+        `L${cR} ${cT+r}`,
+        `Q${cR} ${cT} ${cR-r} ${cT}`,
+        `Z`
+      ].join(' ');
+      scrim.style.clipPath = `path('${svgPath}')`;
+
+      // Place popover above the cutout (8 px arrow + 6 px gap)
+      const popoverTop = cT - popover.offsetHeight - 24;
+      popover.style.left = margin + 'px';
+      popover.style.top  = Math.max(8, popoverTop) + 'px';
+
+      scrim.classList.add('open');
+    }
+
+    function closeAddonsTooltip() {
+      document.getElementById('addons-spotlight').classList.remove('open');
+    }
+
     // ── Reduced liability state ────────────────────
     let reducedLiabilityOn = false;
-
     const RL_RENTAL_KEYS = new Set(['1h','2h','3h','6h','12h']);
     function reducedLiabilityPriceLabel() {
       const durTile = document.querySelector('#duration-carousel .option-tile.selected');
@@ -2860,6 +3036,7 @@
     }
 
     function toggleReducedLiability() {
+      closeAddonsTooltip();
       reducedLiabilityOn = !reducedLiabilityOn;
       const card = document.getElementById('reduced-liability-card');
       card.classList.toggle('deselected', !reducedLiabilityOn);
@@ -2934,6 +3111,7 @@
     let fuelParkingOn = true;
 
     function toggleFuelParking() {
+      closeAddonsTooltip();
       // When tile is disabled (duration < 1 day), clicking anywhere opens the info sheet
       if (document.getElementById('fuel-parking-card').classList.contains('disabled')) {
         openFuelSheet();
@@ -3184,6 +3362,11 @@
       updatePrice();
       updateSubtitle();
       updateCompactTitle();
+
+      // Show add-ons spotlight the first time user picks 1+ days
+      if (FP_ALLOWED_DURATIONS.has(el.dataset.durationKey)) {
+        setTimeout(showAddonsTooltip, 50);
+      }
     }
 
     // ── Distance tile click ────────────────────────
