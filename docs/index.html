@@ -742,7 +742,6 @@
       font-size: 14px;
       font-weight: 400;
       color: rgba(0,10,7,0.63);
-      letter-spacing: -0.084px;
       line-height: 18px;
       font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
     }
@@ -2442,23 +2441,13 @@
             <span class="etd-row-dots"></span>
             <span class="etd-row-value">€0.17</span>
           </div>
-          <div class="etd-row">
-            <span class="etd-row-label">Extra hour</span>
-            <span class="etd-row-dots"></span>
-            <span class="etd-row-value">€7</span>
-          </div>
-          <div class="etd-row">
-            <span class="etd-row-label">Extra day (24 hours)</span>
-            <span class="etd-row-dots"></span>
-            <span class="etd-row-value">€28</span>
-          </div>
-          <div class="etd-row">
+<div class="etd-row">
             <span class="etd-row-label">Extra distance</span>
             <span class="etd-row-dots"></span>
-            <span class="etd-row-value">€0.30/km</span>
+            <span class="etd-row-value" id="extra-distance-value">€0.30/km</span>
           </div>
         </div>
-        <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 16px;">You can return your rental before its scheduled end, but you won't be refunded for unused time.</p>
+        <p style="font-size:14px;font-weight:400;color:rgba(0,10,7,0.63);line-height:20px;letter-spacing:-0.084px;margin:0 0 8px;">You can return your rental before its scheduled end, but you won't be refunded for unused time.</p>
         <div class="fp-sheet-actions">
           <button class="fp-ok-btn" onclick="closeEtdSheet()">OK</button>
           <div class="home-indicator-bar"></div>
@@ -3125,12 +3114,15 @@
       const card = document.getElementById('fuel-parking-card');
       const desc = document.getElementById('fuel-parking-desc');
 
+      const extraDistEl = document.getElementById('extra-distance-value');
       if (fuelParkingOn) {
         card.classList.remove('deselected');
         desc.textContent = 'Included';
+        if (extraDistEl) extraDistEl.innerHTML = '€0.30/km';
       } else {
         card.classList.add('deselected');
         desc.textContent = '+ ' + formatPrice(fuelParkingAddonCost());
+        if (extraDistEl) extraDistEl.innerHTML = '<s style="color:rgba(0,10,7,0.4)">€0.30</s> €0.15/km';
       }
 
       updatePrice();
@@ -3151,6 +3143,8 @@
         if (!fuelParkingOn) {
           fuelParkingOn = true;
           card.classList.remove('deselected');
+          const extraDistEl = document.getElementById('extra-distance-value');
+          if (extraDistEl) extraDistEl.innerHTML = '€0.30/km';
         }
         desc.textContent = 'Included';
         card.classList.add('disabled');
