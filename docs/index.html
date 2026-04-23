@@ -682,7 +682,7 @@
       color: #ffffff;
       white-space: nowrap;
       pointer-events: none;
-      z-index: 10;
+      z-index: 1;
       line-height: 16px;
       letter-spacing: -0.1px;
     }
@@ -997,6 +997,8 @@
       .reserve-caption { display: none; }
       #etd-link-row { display: none; }
       .sticky-payment { display: none; }
+      /* Keep 24px spacing between the add-ons row and the grey divider on mobile */
+      .addons-row { padding-bottom: 24px; }
     }
 
     /* ── Fuel & Parking Info Sheet ───────────────── */
