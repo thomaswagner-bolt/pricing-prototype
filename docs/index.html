@@ -765,23 +765,6 @@
       width: 24px;
       height: 24px;
     }
-    /* ── Addon checkbox (visual indicator) ──────── */
-    .addon-checkbox {
-      display: block;
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-      pointer-events: none;
-    }
-    .addon-checkbox svg {
-      width: 24px;
-      height: 24px;
-      display: block;
-    }
-    .addon-checkbox .cb-checked  { display: none; }
-    .addon-checkbox .cb-unchecked { display: block; }
-    .addon-card:not(.deselected) .addon-checkbox .cb-checked   { display: block; }
-    .addon-card:not(.deselected) .addon-checkbox .cb-unchecked { display: none; }
 
     /* ── Section divider — Figma "Divider / Card [8]" ── */
     .section-divider {
@@ -2123,16 +2106,11 @@
               <div class="addon-name">Fuel &amp; parking</div>
               <div class="addon-desc" id="fuel-parking-desc">Included</div>
             </div>
-            <div class="addon-end">
-              <span class="addon-checkbox" aria-hidden="true">
-                <svg class="cb-checked" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="2" y="2" width="20" height="20" rx="4" fill="#2B8659"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M17.695 7.75479C18.0826 8.11179 18.1036 8.71128 17.7418 9.09378L11.0218 16.199C10.8403 16.391 10.5861 16.5 10.32 16.5C10.0539 16.5 9.79975 16.391 9.61819 16.199L6.25819 12.6464C5.89643 12.2639 5.91738 11.6644 6.30498 11.3074C6.69258 10.9504 7.30006 10.9711 7.66182 11.3536L10.32 14.1642L16.3382 7.80097C16.6999 7.41846 17.3074 7.39779 17.695 7.75479Z" fill="white"/>
-                </svg>
-                <svg class="cb-unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="3" y="3" width="18" height="18" rx="4" stroke="rgba(0,17,11,0.47)" stroke-width="2" fill="none"/>
-                </svg>
-              </span>
+            <div class="addon-end" onclick="event.stopPropagation(); openFuelSheet()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(0,10,7,0.4)" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 11v5M12 8v.5" stroke-linecap="round"/>
+              </svg>
             </div>
           </button>
 
@@ -2145,16 +2123,12 @@
               <div class="addon-name">Reduced liability<div class="addon-subline">from €750 to €0</div></div>
               <div class="addon-desc" id="reduced-liability-desc">+ €9/day</div>
             </div>
-            <div class="addon-end">
-              <span class="addon-checkbox" aria-hidden="true">
-                <svg class="cb-checked" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="2" y="2" width="20" height="20" rx="4" fill="#2B8659"/>
-                  <path fill-rule="evenodd" clip-rule="evenodd" d="M17.695 7.75479C18.0826 8.11179 18.1036 8.71128 17.7418 9.09378L11.0218 16.199C10.8403 16.391 10.5861 16.5 10.32 16.5C10.0539 16.5 9.79975 16.391 9.61819 16.199L6.25819 12.6464C5.89643 12.2639 5.91738 11.6644 6.30498 11.3074C6.69258 10.9504 7.30006 10.9711 7.66182 11.3536L10.32 14.1642L16.3382 7.80097C16.6999 7.41846 17.3074 7.39779 17.695 7.75479Z" fill="white"/>
-                </svg>
-                <svg class="cb-unchecked" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="3" y="3" width="18" height="18" rx="4" stroke="rgba(0,17,11,0.47)" stroke-width="2" fill="none"/>
-                </svg>
-              </span>
+            <div class="addon-end" onclick="event.stopPropagation(); openRlSheet()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(0,10,7,0.4)" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9"/>
+                <line x1="12" y1="8" x2="12" y2="8.5" stroke-linecap="round"/>
+                <line x1="12" y1="11" x2="12" y2="16" stroke-linecap="round"/>
+              </svg>
             </div>
           </button>
         </div>
