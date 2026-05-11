@@ -1904,15 +1904,147 @@
       letter-spacing: 0; line-height: 22px;
       cursor: none;
     }
+
+    /* ── Password gate ───────────────────────────── */
+    .pw-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #d6d6d6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      font-family: 'Inter', sans-serif;
+    }
+    .pw-overlay.dismissed {
+      pointer-events: none;
+      animation: pw-fade-out 0.35s ease forwards;
+    }
+    @keyframes pw-fade-out {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+    .pw-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0px 6px 24px rgba(0,0,0,0.14);
+      width: 343px;
+      padding: 10px 0 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .pw-header {
+      padding: 12px 24px;
+    }
+    .pw-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #191f1c;
+      line-height: 30px;
+      letter-spacing: -0.48px;
+      margin: 0;
+      font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
+    }
+    .pw-spacer { height: 12px; }
+    .pw-field-wrap {
+      padding: 0 24px;
+    }
+    .pw-input {
+      width: 100%;
+      height: 56px;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 16px;
+      font-weight: 400;
+      font-family: 'Inter', sans-serif;
+      color: #191f1c;
+      background: rgba(0,45,30,0.07);
+      outline: none;
+      box-sizing: border-box;
+      letter-spacing: -0.176px;
+      font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .pw-input::placeholder { color: rgba(0,10,7,0.63); }
+    .pw-input:focus {
+      background: #fff;
+      border-color: #2b8659;
+    }
+    .pw-input.error {
+      background: #fff;
+      border-color: #d93030;
+    }
+    .pw-input.error:focus { border-color: #d93030; }
+    .pw-error-msg {
+      font-size: 14px;
+      color: #d93030;
+      margin: 6px 0 0;
+      padding: 0 2px;
+      display: none;
+      font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
+    }
+    .pw-error-msg.visible { display: block; }
+    .pw-actions {
+      padding: 24px 16px 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .pw-btn {
+      width: 100%;
+      height: 56px;
+      border-radius: 9600px;
+      border: none;
+      background: #2b8659;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      transition: background 0.15s, opacity 0.15s;
+      font-feature-settings: 'cv03' 1, 'cv04' 1, 'lnum' 1, 'pnum' 1;
+    }
+    .pw-btn:disabled {
+      background: rgba(0,45,30,0.07);
+      color: rgba(0,10,7,0.3);
+      cursor: default;
+    }
+    .pw-btn:not(:disabled):active { opacity: 0.85; }
 </style>
 </head>
 <body>
+
+  <!-- Password gate -->
+  <div class="pw-overlay" id="pw-overlay">
+    <div class="pw-card">
+      <div class="pw-header">
+        <p class="pw-title">Access prototype</p>
+      </div>
+      <div class="pw-spacer"></div>
+      <div class="pw-field-wrap">
+        <input
+          class="pw-input"
+          id="pw-input"
+          type="password"
+          placeholder="Enter password"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <p class="pw-error-msg" id="pw-error">Incorrect password. Try again.</p>
+      </div>
+      <div class="pw-actions">
+        <button class="pw-btn" id="pw-btn" disabled onclick="checkPassword()">Confirm</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Finger cursor dot -->
   <div class="cursor-dot" id="cursor-dot"></div>
 
   <!-- iPhone 16 frame -->
-  <div class="iphone-frame">
+  <div class="iphone-frame" id="iphone-frame" style="visibility:hidden">
     <div class="iphone-vol-up"></div>
     <div class="iphone-vol-down"></div>
     <!-- Dynamic Island overlaid on screen -->
@@ -3768,6 +3900,44 @@
       }, 300);
     }
   });
+</script>
+<script>
+  // ── Password gate ─────────────────────────────────
+  (function () {
+    const CORRECT = 'Bolt2026';
+    const overlay = document.getElementById('pw-overlay');
+    const input   = document.getElementById('pw-input');
+    const btn     = document.getElementById('pw-btn');
+    const errMsg  = document.getElementById('pw-error');
+
+    // Enable button when something is typed; clear error state while re-typing
+    input.addEventListener('input', function () {
+      btn.disabled = input.value.length === 0;
+      if (input.classList.contains('error')) {
+        input.classList.remove('error');
+        errMsg.classList.remove('visible');
+      }
+    });
+
+    // Allow Enter key to submit
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    window.checkPassword = function () {
+      if (input.value === CORRECT) {
+        document.getElementById('iphone-frame').style.visibility = 'visible';
+        overlay.classList.add('dismissed');
+        overlay.addEventListener('animationend', function () {
+          overlay.style.display = 'none';
+        }, { once: true });
+      } else {
+        input.classList.add('error');
+        errMsg.classList.add('visible');
+        input.select();
+      }
+    };
+  })();
 </script>
 </body>
 </html>
