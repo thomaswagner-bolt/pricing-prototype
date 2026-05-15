@@ -2463,7 +2463,7 @@
               <div class="accordion-answer">
                 <p>By default, your liability for damage to the vehicle is limited to €750. Your liability for damage to others is limited to €750.</p>
                 <p>Pay extra to reduce your liability to €0.</p>
-                <p>Renting per hour: + €4/rental<br>Renting per day: + €9/day</p>
+                <p>+ €9/day</p>
                 <p>Protection is subject to compliance with Bolt's Terms &amp; Conditions. Report accidents or damage immediately to Bolt and the police.</p>
               </div>
             </div>
@@ -2912,12 +2912,7 @@
         <!-- Pricing rows -->
         <div style="padding: 8px 0 0 0; display:flex; flex-direction:column; gap:0;">
           <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;">
-            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Renting per hour</span>
-            <span style="flex:1;border-bottom:1px dotted rgba(0,45,30,0.2);margin:0 6px 3px;"></span>
-            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">+ €4/rental</span>
-          </div>
-          <div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;">
-            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Renting per day</span>
+            <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">Reduced liability</span>
             <span style="flex:1;border-bottom:1px dotted rgba(0,45,30,0.2);margin:0 6px 3px;"></span>
             <span style="font-size:16px;font-weight:400;color:#191f1c;line-height:20px;letter-spacing:-0.176px;white-space:nowrap;">+ €9/day</span>
           </div>
@@ -3152,11 +3147,8 @@
     // ── Reduced liability state ────────────────────
     let reducedLiabilityOn = false;
     let reducedLiabilitySeenInfo = false;
-    const RL_RENTAL_KEYS = new Set(['1h','2h','3h','6h','12h']);
     function reducedLiabilityPriceLabel() {
-      const durTile = document.querySelector('#duration-carousel .option-tile.selected');
-      const key = durTile ? durTile.dataset.durationKey : '1h';
-      return RL_RENTAL_KEYS.has(key) ? '+ €4/rental' : '+ €9/day';
+      return '+ €9/day';
     }
 
     function selectReducedLiability(value) {
@@ -3241,14 +3233,14 @@
       document.getElementById('success-screen').classList.remove('open');
     }
 
-    // Returns the reduced liability cost based on duration
+    // Returns the reduced liability cost based on duration (per-day pricing only)
     function reducedLiabilityCost() {
       const durTile = document.querySelector('#duration-carousel .option-tile.selected');
       if (!durTile) return 0;
       const key = durTile.dataset.durationKey;
       const n = parseInt(key);
-      // 1h–12h → flat €4/rental; days → n × €9/day
-      if (!key.endsWith('d')) return 4;
+      // Always use per-day pricing; hourly rentals count as 1 day
+      if (!key.endsWith('d')) return 9;
       return n * 9;
     }
 
