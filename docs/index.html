@@ -2954,29 +2954,6 @@
     </div>
 
   
-    <!-- ── Onboarding modal ──────────────────────── -->
-    <div class="onboarding-scrim" id="onboarding-scrim" onclick="closeOnboarding()"></div>
-    <div class="onboarding-sheet" id="onboarding-sheet">
-      <div class="onboarding-handle"><div class="onboarding-handle-bar"></div></div>
-      <button class="onboarding-close" onclick="closeOnboarding()">
-        <div class="onboarding-close-inner">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 6l12 12M18 6L6 18" stroke="#191f1c" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </button>
-      <div class="onboarding-content">
-        <img src="add-ons.png" alt="Add-ons illustration" style="width:248px;height:150px;object-fit:contain;margin-bottom:2px;">
-        <!-- Text -->
-        <h2 class="onboarding-title">Choose what's included</h2>
-        <p class="onboarding-body">You decide where to save. Pick your protection level, and for drives of 1+ days, decide whether to include fuel and parking.</p>
-      </div>
-      <!-- CTA -->
-      <div class="onboarding-actions">
-        <button class="onboarding-btn" onclick="closeOnboarding()">Get started</button>
-        <div class="home-indicator-bar"></div>
-      </div>
-    </div>
 
   </div><!-- /phone-shell -->
   </div><!-- /iphone-frame -->
@@ -3495,10 +3472,6 @@
       updateSubtitle();
       updateCompactTitle();
 
-      // Show add-ons spotlight the first time user picks 1+ days
-      if (FP_ALLOWED_DURATIONS.has(el.dataset.durationKey)) {
-        setTimeout(showAddonsTooltip, 50);
-      }
     }
 
     // ── Distance tile click ────────────────────────
@@ -3794,19 +3767,6 @@
       });
     }
   
-    // ── Onboarding modal ──────────────────────────
-    // Sheet animates in automatically via CSS. JS handles the main-screen scale + dismissal.
-    setTimeout(function() {
-      sheetOpen();
-      document.getElementById('onboarding-scrim').classList.add('open');
-      document.getElementById('onboarding-sheet').classList.add('open');
-    }, 200);
-
-    function closeOnboarding() {
-      sheetClose();
-      document.getElementById('onboarding-scrim').classList.remove('open');
-      document.getElementById('onboarding-sheet').classList.remove('open');
-    }
 </script>
 <script>
   // ── Swipe-to-close for all bottom sheets ──────────
@@ -3816,7 +3776,6 @@
       { id: 'etd-sheet',        close: () => closeEtdSheet() },
       { id: 'rl-sheet',         close: () => closeRlSheet() },
       { id: 'prereserve-sheet', close: () => closePreReserveSheet() },
-      { id: 'onboarding-sheet', close: () => closeOnboarding() },
       { id: 'intercity-modal',  close: () => closeIntercityModal() },
       { id: 'airport-modal',    close: () => closeAirportModal() },
     ];
@@ -3905,6 +3864,8 @@
         overlay.classList.add('dismissed');
         overlay.addEventListener('animationend', function () {
           overlay.style.display = 'none';
+          // Show the page first, then reveal the tooltip after a short delay
+          setTimeout(showAddonsTooltip, 500);
         }, { once: true });
       } else {
         input.classList.add('error');
