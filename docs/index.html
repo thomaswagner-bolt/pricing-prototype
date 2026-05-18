@@ -2131,8 +2131,8 @@
         <div class="nav-subtitle" id="nav-subtitle">From now until …</div>
       </div>
 
-      <!-- TABS (scrolls with content) -->
-      <div class="tabs">
+      <!-- TABS (scrolls with content) — hidden -->
+      <div class="tabs" style="display:none;">
         <button class="tab-item active" id="tab-all" onclick="switchTab('all')">
           <span class="tab-label">All</span>
           <span class="tab-underline"></span>
@@ -2562,7 +2562,7 @@
         <p style="font-size:16px;font-weight:400;color:rgba(0,112,66,0.92);line-height:24px;letter-spacing:-0.176px;margin:0;padding: 4px 0 0;cursor:pointer;" onclick="navigateToRefuelFaq()">How does refuelling work?</p>
       </div>
       <div class="fp-sheet-actions" style="padding-left:24px;padding-right:24px;">
-        <button onclick="closeFuelSheet()" style="width:100%;min-height:56px;background:rgba(0,45,30,0.07);border:none;border-radius:9600px;font-size:18px;font-weight:600;color:#191f1c;letter-spacing:-0.252px;line-height:22px;">OK</button>
+        <button onclick="confirmFuelSheet()" style="width:100%;min-height:56px;background:rgba(0,45,30,0.07);border:none;border-radius:9600px;font-size:18px;font-weight:600;color:#191f1c;letter-spacing:-0.252px;line-height:22px;">OK</button>
         <div class="home-indicator-bar"></div>
       </div>
     </div>
@@ -3016,6 +3016,42 @@
       document.getElementById('fp-sheet-unified').classList.remove('open');
     }
 
+    // Called by the OK button — closes the sheet and, if opened from an hourly tier,
+    // auto-upgrades to 1 day and deselects fuel & parking.
+    function confirmFuelSheet() {
+      const fromDisabled = fuelSheetFromDisabled;
+      fuelSheetFromDisabled = false;
+      closeFuelSheet();
+      if (!fromDisabled) return;
+
+      const currentKm = getSelectedKm();
+      const oneDayTile = document.querySelector('#duration-carousel .option-tile[data-duration-key="1d"]');
+      if (oneDayTile) {
+        document.querySelectorAll('#duration-carousel .option-tile').forEach(t => {
+          t.classList.remove('selected');
+          t.querySelector('.option-value').style.fontWeight = '400';
+        });
+        oneDayTile.classList.add('selected');
+        oneDayTile.querySelector('.option-value').style.fontWeight = '600';
+        oneDayTile.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        buildDistanceCarousel('1d', currentKm);
+        updateSubtitle();
+        updateCompactTitle();
+      }
+      // Enable and deselect F&P
+      const card = document.getElementById('fuel-parking-card');
+      card.classList.remove('disabled');
+      fuelParkingOn = false;
+      card.classList.add('deselected');
+      const desc = document.getElementById('fuel-parking-desc');
+      desc.textContent = '+ ' + formatPrice(fuelParkingAddonCost());
+      const extraDistEl = document.getElementById('extra-distance-value');
+      if (extraDistEl) extraDistEl.innerHTML = '<s style="color:rgba(0,10,7,0.4)">€0.30</s> €0.15/km';
+      const fpCheckbox = document.getElementById('fp-checkbox');
+      if (fpCheckbox) fpCheckbox.innerHTML = '<rect x="2.75" y="2.75" width="18.5" height="18.5" rx="3.25" stroke="rgba(0,10,7,0.2)" stroke-width="1.5" fill="none"/>';
+      updatePrice();
+    }
+
     // ── Fuel & parking tile badge ─────────────────
     function updateFpBadge() {
       const badge = document.getElementById('fp-tile-badge');
@@ -3168,12 +3204,6 @@
 
     function toggleReducedLiability() {
       closeAddonsTooltip();
-      // First tap while off → show info sheet; subsequent taps toggle normally
-      if (!reducedLiabilityOn && !reducedLiabilitySeenInfo) {
-        reducedLiabilitySeenInfo = true;
-        openRlSheet();
-        return;
-      }
       selectReducedLiability(!reducedLiabilityOn);
     }
 
@@ -3246,12 +3276,43 @@
 
     // ── Fuel & parking state ───────────────────────
     let fuelParkingOn = true;
+    let fuelParkingInfoShown = false;   // tracks whether the F&P info sheet has been shown once
+    let fuelSheetFromDisabled = false;  // true when sheet was opened via the disabled-tile (hourly) path
 
     function toggleFuelParking() {
       closeAddonsTooltip();
-      // When tile is disabled (duration < 1 day), clicking anywhere opens the info sheet
+      // When tile is disabled (duration < 1 day):
+      // Auto-upgrade to 1 day and deselect F&P when tapped on an hourly tier
       if (document.getElementById('fuel-parking-card').classList.contains('disabled')) {
-        openFuelSheet();
+        const currentKm = getSelectedKm();
+        // Select the 1d duration tile
+        const oneDayTile = document.querySelector('#duration-carousel .option-tile[data-duration-key="1d"]');
+        if (oneDayTile) {
+          document.querySelectorAll('#duration-carousel .option-tile').forEach(t => {
+            t.classList.remove('selected');
+            t.querySelector('.option-value').style.fontWeight = '400';
+          });
+          oneDayTile.classList.add('selected');
+          oneDayTile.querySelector('.option-value').style.fontWeight = '600';
+          // Scroll 1d tile into view in the carousel
+          oneDayTile.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          // Rebuild distance carousel keeping nearest km to what was selected
+          buildDistanceCarousel('1d', currentKm);
+          updateSubtitle();
+          updateCompactTitle();
+        }
+        // Now enable and deselect F&P
+        const card = document.getElementById('fuel-parking-card');
+        card.classList.remove('disabled');
+        fuelParkingOn = false;
+        card.classList.add('deselected');
+        const desc = document.getElementById('fuel-parking-desc');
+        desc.textContent = '+ ' + formatPrice(fuelParkingAddonCost());
+        const extraDistEl = document.getElementById('extra-distance-value');
+        if (extraDistEl) extraDistEl.innerHTML = '<s style="color:rgba(0,10,7,0.4)">€0.30</s> €0.15/km';
+        const fpCheckbox = document.getElementById('fp-checkbox');
+        if (fpCheckbox) fpCheckbox.innerHTML = '<rect x="2.75" y="2.75" width="18.5" height="18.5" rx="3.25" stroke="rgba(0,10,7,0.2)" stroke-width="1.5" fill="none"/>';
+        updatePrice();
         return;
       }
       const kmTile = document.querySelector('#distance-carousel .option-tile.selected');
@@ -3513,10 +3574,6 @@
       updateSubtitle();
       updateCompactTitle();
 
-      // Show add-ons spotlight the first time user picks 1+ days
-      if (FP_ALLOWED_DURATIONS.has(el.dataset.durationKey)) {
-        setTimeout(showAddonsTooltip, 50);
-      }
     }
 
     // ── Distance tile click ────────────────────────
@@ -3824,6 +3881,8 @@
       sheetClose();
       document.getElementById('onboarding-scrim').classList.remove('open');
       document.getElementById('onboarding-sheet').classList.remove('open');
+      // Show the F&P tooltip right after the onboarding sheet closes
+      setTimeout(showAddonsTooltip, 50);
     }
 </script>
 <script>
