@@ -3255,10 +3255,88 @@
       updateFpBadge();
     }
 
-    // Cost of adding fuel & parking = 50% of km cost at full rate
+    // ── Fuel & parking price lookup tables ────────────
+    // Keys are duration keys ('1d','2d','3d','7d'); values map km → total base price (excl. liability)
+
+    const FP_INCLUDED_PRICE_TABLE = {
+      '1d': {30: 29.40, 50: 34.50, 75: 40.80, 100: 47.10, 150: 59.70, 250: 84.90, 500: 147.90, 750: 210.90},
+      '2d': {50: 56.30, 100: 68.90, 200: 94.10, 300: 119.30, 500: 169.70, 750: 232.70, 1000: 295.70},
+      '3d': {100: 91.00, 200: 116.00, 300: 141.00, 500: 192.00, 750: 255.00, 1000: 318.00, 1500: 444.00},
+      '7d': {250: 216.00, 500: 279.00, 750: 342.00, 1000: 405.00, 1500: 531.00, 2000: 657.00},
+    };
+
+    const FP_EXCLUDED_PRICE_TABLE = {
+      '1d': {30: 24.36, 50: 26.29, 75: 28.22, 100: 30.15, 150: 32.07, 250: 34.00, 500: 38.82, 750: 43.64},
+      '2d': {50: 47.53, 100: 52.65, 200: 57.77, 300: 62.88, 500: 68.00, 750: 74.40, 1000: 80.79},
+      '3d': {100: 74.56, 200: 78.25, 300: 81.94, 500: 85.62, 750: 89.31, 1000: 93.00, 1500: 100.38},
+      '7d': {250: 175.50, 500: 181.00, 750: 186.50, 1000: 192.00, 1500: 197.50, 2000: 203.00},
+    };
+
+    // Shared interpolation helper — looks up km in a {km: price} table,
+    // interpolating/extrapolating linearly for values not present.
+    // Returns null if the table is falsy.
+    function lookupPriceFromTable(table, km) {
+      if (!table) return null;
+
+      const entries = Object.keys(table)
+        .map(k => [parseInt(k, 10), table[k]])
+        .sort((a, b) => a[0] - b[0]);
+
+      if (table[km] !== undefined) return table[km];
+
+      if (km < entries[0][0]) {
+        if (entries.length >= 2) {
+          const slope = (entries[1][1] - entries[0][1]) / (entries[1][0] - entries[0][0]);
+          return entries[0][1] + slope * (km - entries[0][0]);
+        }
+        return entries[0][1];
+      }
+
+      if (km > entries[entries.length - 1][0]) {
+        const n = entries.length;
+        if (n >= 2) {
+          const slope = (entries[n-1][1] - entries[n-2][1]) / (entries[n-1][0] - entries[n-2][0]);
+          return entries[n-1][1] + slope * (km - entries[n-1][0]);
+        }
+        return entries[entries.length - 1][1];
+      }
+
+      for (let i = 0; i < entries.length - 1; i++) {
+        if (km >= entries[i][0] && km <= entries[i+1][0]) {
+          const ratio = (km - entries[i][0]) / (entries[i+1][0] - entries[i][0]);
+          return entries[i][1] + ratio * (entries[i+1][1] - entries[i][1]);
+        }
+      }
+
+      return null;
+    }
+
+    // 6h and 12h share the same pricing as 1d
+    function normaliseDurationKey(durationKey) {
+      return (durationKey === '6h' || durationKey === '12h') ? '1d' : durationKey;
+    }
+
+    function getFpIncludedBasePrice(durationKey, km) {
+      return lookupPriceFromTable(FP_INCLUDED_PRICE_TABLE[normaliseDurationKey(durationKey)], km);
+    }
+
+    function getFpExcludedBasePrice(durationKey, km) {
+      return lookupPriceFromTable(FP_EXCLUDED_PRICE_TABLE[normaliseDurationKey(durationKey)], km);
+    }
+
+    // Cost of adding fuel & parking = difference between included and excluded price
     function fuelParkingAddonCost() {
-      const kmTile = document.querySelector('#distance-carousel .option-tile.selected');
+      const durTile = document.querySelector('#duration-carousel .option-tile.selected');
+      const kmTile  = document.querySelector('#distance-carousel .option-tile.selected');
       const km = kmTile ? parseInt(kmTile.dataset.km, 10) : 0;
+      const durationKey = durTile ? durTile.dataset.durationKey : null;
+
+      const incl = durationKey ? getFpIncludedBasePrice(durationKey, km) : null;
+      const excl = durationKey ? getFpExcludedBasePrice(durationKey, km) : null;
+      if (incl !== null && excl !== null) return Math.max(0, incl - excl);
+
+      // Fallback for durations not in either table
+      const base = durationKey ? durationCost(durationKey) : 0;
       return km * RATE_PER_KM * 0.5;
     }
 
@@ -3282,7 +3360,7 @@
 
     // Formats a number only (no € sign) — whole numbers show no decimals
     function formatNum(amount) {
-      return amount % 1 === 0 ? String(amount) : amount.toFixed(2);
+      return String(Math.round(amount));
     }
 
     // Formats a price with € prefix (used for add-on descriptions)
@@ -3367,7 +3445,12 @@
       const km            = kmTile ? parseInt(kmTile.dataset.km, 10) : 0;
       const base          = durationCost(durationKey);
       const liabilityCost = reducedLiabilityOn ? reducedLiabilityCost() : 0;
-      const fullTotal     = base + km * RATE_PER_KM + liabilityCost;
+
+      // Use lookup table for included price; fall back to formula for unlisted durations
+      const fpIncludedBase = getFpIncludedBasePrice(durationKey, km);
+      const fullTotal = fpIncludedBase !== null
+        ? fpIncludedBase + liabilityCost
+        : base + km * RATE_PER_KM + liabilityCost;
 
       // Sync fuel & parking availability (requires 1d+ duration)
       syncFuelParkingAvailability();
@@ -3379,14 +3462,17 @@
       if (fuelParkingOn) {
         setPrice(fullTotal);
       } else {
-        const discountedTotal = base + km * RATE_PER_KM * 0.5 + liabilityCost;
+        const fpExcludedBase = getFpExcludedBasePrice(durationKey, km);
+        const discountedTotal = fpExcludedBase !== null
+          ? fpExcludedBase + liabilityCost
+          : base + km * RATE_PER_KM * 0.5 + liabilityCost;
         setPrice(discountedTotal, fullTotal);
       }
 
       // Keep fuel & parking subline in sync when km selection changes
       if (!fuelParkingOn) {
         const desc = document.getElementById('fuel-parking-desc');
-        desc.textContent = '+ ' + formatPrice(km * RATE_PER_KM * 0.5);
+        desc.textContent = '+ ' + formatPrice(fuelParkingAddonCost());
       }
 
       // Keep the "Remove to save €X" badge amount in sync too
@@ -3401,15 +3487,15 @@
       '1h':  [5, 10, 20, 30, 50, 75],
       '2h':  [10, 20, 30, 50, 100, 150],
       '3h':  [10, 20, 50, 75, 100, 150],
-      '6h':  [20, 50, 100, 250, 500, 750],
-      '12h': [50, 100, 150, 250, 500, 750],
-      '1d':  [50, 100, 250, 500, 750, 1000],
-      '2d':  [100, 200, 300, 500, 750, 1000],
-      '3d':  [100, 250, 400, 600, 900, 1200],
+      '6h':  [30, 50, 75, 100, 150, 250, 500, 750],
+      '12h': [30, 50, 75, 100, 150, 250, 500, 750],
+      '1d':  [30, 50, 75, 100, 150, 250, 500, 750],
+      '2d':  [50, 100, 200, 300, 500, 750, 1000],
+      '3d':  [100, 200, 300, 500, 750, 1000, 1500],
       '4d':  [100, 200, 400, 600, 900, 1200],
       '5d':  [100, 200, 400, 700, 900, 1200],
       '6d':  [100, 250, 500, 750, 1000, 1200],
-      '7d':  [100, 250, 500, 750, 1000, 1200],
+      '7d':  [250, 500, 750, 1000, 1500, 2000],
       '8d':  [100, 200, 400, 600, 800, 1200],
       '9d':  [100, 200, 400, 600, 800, 1200],
       '10d': [100, 250, 500, 750, 1000, 1200],
